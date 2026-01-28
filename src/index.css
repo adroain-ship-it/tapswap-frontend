@@ -86,4 +86,104 @@ body {
 .page-container::-webkit-scrollbar {
   width: 0px;
   display: none;
+
+}
+/* ===== DODAJ DO index.css LUB globals.css ===== */
+
+/* OnClickA Persistent Banner Styles */
+.onclicka-banner-wrapper {
+  /* Prevent layout shift */
+  contain: layout style;
+  will-change: transform;
+  
+  /* Smooth transitions */
+  transition: none !important;
+  
+  /* iPhone safe area */
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Ad container */
+.ad-space {
+  /* Prevent content jumping */
+  min-height: inherit;
+  
+  /* Center ad content */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Ad fallback/loading */
+.ad-fallback {
+  /* Invisible when ad loads */
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+/* When ad is loaded, hide fallback */
+.ad-space > *:not(.ad-fallback) ~ .ad-fallback {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Prevent OnClickA iframe from causing layout shift */
+.ad-space iframe {
+  display: block !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* Smooth scrolling for content below banner */
+.flex-1.overflow-y-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent content jump on route change */
+* {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+/* Small phones */
+@media (max-width: 360px) {
+  .onclicka-banner-wrapper {
+    height: 80px !important;
+    min-height: 80px !important;
+  }
+}
+
+/* Tablets and larger */
+@media (min-width: 768px) {
+  .ad-space {
+    max-width: 728px;
+    margin: 0 auto;
+  }
+}
+
+/* iPhone notch compensation */
+@supports (padding: env(safe-area-inset-top)) {
+  .onclicka-banner-wrapper {
+    padding-top: calc(env(safe-area-inset-top) + 0px);
+  }
+}
+
+/* Dark mode compatibility */
+@media (prefers-color-scheme: dark) {
+  .onclicka-banner-wrapper {
+    background-color: rgba(10, 14, 39, 0.98);
+  }
+}
+
+/* Animation for ad refresh (subtle) */
+@keyframes adRefresh {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
+}
+
+.ad-space.refreshing {
+  animation: adRefresh 0.3s ease;
 }
