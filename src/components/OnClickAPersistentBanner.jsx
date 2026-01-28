@@ -1,9 +1,56 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 
 const OnClickAPersistentBanner = ({ height = 100 }) => {
+  const containerRef = useRef(null)
+  const scriptLoadedRef = useRef(false)
+
+  useEffect(() => {
+    if (scriptLoadedRef.current) return
+
+    // Load OnClickA script
+    const script = document.createElement('script')
+    script.src = 'https://js.onclckmn.com/static/onclicka.js'
+    script.async = true
+    
+    script.onload = () => {
+      console.log('✅ OnClickA script loaded')
+      scriptLoadedRef.current = true
+      
+      // Initialize after script loads
+      setTimeout(() => {
+        if (window.OnClickA && containerRef.current) {
+          try {
+            window.OnClickA.init({
+              spotId: '6108783',
+              container: '.ad-space-onclicka'
+            })
+            console.log('✅ OnClickA initialized')
+          } catch (error) {
+            console.error('❌ OnClickA init error:', error)
+          }
+        } else {
+          console.error('❌ OnClickA not available')
+        }
+      }, 1000)
+    }
+    
+    script.onerror = () => {
+      console.error('❌ Failed to load OnClickA script')
+    }
+    
+    document.head.appendChild(script)
+    
+    return () => {
+      // Cleanup
+      if (document.head.contains(script)) {
+        document.head.removeChild(script)
+      }
+    }
+  }, [])
+
   return (
     <div 
-      className="onclicka-banner-wrapper"
+      ref={containerRef}
       style={{
         position: 'sticky',
         top: 0,
@@ -12,41 +59,30 @@ const OnClickAPersistentBanner = ({ height = 100 }) => {
         zIndex: 1000,
         height: `${height}px`,
         minHeight: `${height}px`,
-        backgroundColor: 'rgba(10, 14, 39, 0.95)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(99, 102, 241, 0.2)',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+        backgroundColor: '#1a1f3a',
+        borderBottom: '1px solid rgba(99, 102, 241, 0.3)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      {/* OnClickA Container */}
+      {/* OnClickA container */}
       <div 
-        className="ad-space"
+        className="ad-space-onclicka"
         style={{
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
         }}
       >
-        {/* Fallback/Loading State */}
-        <div 
-          className="ad-fallback"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'rgba(156, 163, 175, 0.5)',
-            fontSize: '12px',
-            fontWeight: '500',
-            pointerEvents: 'none',
-          }}
-        >
-          🎯 Ad Space
+        {/* Fallback */}
+        <div style={{
+          color: 'rgba(156, 163, 175, 0.5)',
+          fontSize: '12px',
+        }}>
+          Loading ad...
         </div>
       </div>
     </div>
