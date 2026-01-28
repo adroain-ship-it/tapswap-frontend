@@ -93,7 +93,7 @@ const Home = ({ user, updateUser, globalStats }) => {
           response.data.warnings.forEach(warning => {
             const alertKey = `booster_warning_${warning.type}_${Math.floor(warning.minutesLeft / 10)}`
             if (!localStorage.getItem(alertKey)) {
-              alert(warning.message)
+              WebApp.showAlert(warning.message)
               localStorage.setItem(alertKey, 'shown')
               
               setTimeout(() => {
@@ -207,7 +207,7 @@ const Home = ({ user, updateUser, globalStats }) => {
   const energyPercent = (energy / user.maxEnergy) * 100
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white p-4 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white p-4 flex flex-col pb-24">
       {/* HEADER */}
       <div className="mb-6">
         <div className="bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 backdrop-blur-xl rounded-3xl p-6 border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
@@ -267,7 +267,7 @@ const Home = ({ user, updateUser, globalStats }) => {
       </div>
 
       {/* ENERGY BAR */}
-      <div className="mt-6 mb-20">
+      <div className="mt-6">
         <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 backdrop-blur-xl rounded-2xl p-4 border border-cyan-500/20">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -313,30 +313,6 @@ const Home = ({ user, updateUser, globalStats }) => {
           </div>
         </div>
       </div>
-
-      {/* GLOBAL STATS */}
-      {globalStats && (
-        <div className="fixed bottom-20 left-0 right-0 px-4">
-          <div className="bg-gradient-to-r from-cyan-500/5 via-blue-500/5 to-purple-500/5 backdrop-blur-lg rounded-2xl p-3 border border-cyan-500/10">
-            <div className="flex justify-around text-center">
-              <div>
-                <div className="text-gray-400 text-xs mb-1">TOTAL PLAYERS</div>
-                <div className="text-cyan-400 font-bold text-sm">{globalStats.totalUsers?.toLocaleString()}</div>
-              </div>
-              <div className="w-px bg-gradient-to-b from-transparent via-cyan-500/30 to-transparent" />
-              <div>
-                <div className="text-gray-400 text-xs mb-1">TOTAL COINS</div>
-                <div className="text-blue-400 font-bold text-sm">{globalStats.totalCoins?.toLocaleString()}</div>
-              </div>
-              <div className="w-px bg-gradient-to-b from-transparent via-purple-500/30 to-transparent" />
-              <div>
-                <div className="text-gray-400 text-xs mb-1">TOTAL TAPS</div>
-                <div className="text-purple-400 font-bold text-sm">{globalStats.totalTaps?.toLocaleString()}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
