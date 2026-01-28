@@ -103,22 +103,12 @@ function App() {
     switch (currentPage) {
       case 'home':
         return <Home user={user} updateUser={updateUser} globalStats={globalStats} />
-        case 'league':
-     return <League user={user} />
+      case 'league':
+        return <League user={user} />
       case 'shop':
         return <Shop user={user} updateUser={updateUser} />
       case 'tasks':
         return <Tasks user={user} updateUser={updateUser} />
-      case 'league':
-        return (
-          <div className="min-h-screen bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white pb-24 flex items-center justify-center">
-            <div className="text-center px-6">
-              <div className="text-6xl mb-4">🏆</div>
-              <div className="text-2xl font-bold mb-2">League</div>
-              <div className="text-gray-400">Coming soon!</div>
-            </div>
-          </div>
-        )
       case 'referrals':
         return <Referrals user={user} />
       case 'admin':
