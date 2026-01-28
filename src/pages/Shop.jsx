@@ -6,22 +6,17 @@ import AdBanner from '../components/AdBanner'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
+// ONLY AUTOCLICKER - NO STAMINA!
 const BOOSTERS = [
   { id: 'auto_2h', name: 'Autoclicker', duration: 2, price: 100, emoji: '🤖', desc: 'Auto-tap for 2 hours', hours: '2H', type: 'autoclicker' },
   { id: 'auto_5h', name: 'Autoclicker', duration: 5, price: 200, emoji: '🤖', desc: 'Auto-tap for 5 hours', hours: '5H', type: 'autoclicker' },
   { id: 'auto_10h', name: 'Autoclicker', duration: 10, price: 350, emoji: '🤖', desc: 'Auto-tap for 10 hours', hours: '10H', type: 'autoclicker' },
   { id: 'auto_24h', name: 'Autoclicker', duration: 24, price: 750, emoji: '🤖', desc: 'Auto-tap for 24 hours', hours: '24H', type: 'autoclicker' },
   { id: 'auto_3d', name: 'Autoclicker', duration: 72, price: 1800, emoji: '🤖', desc: 'Auto-tap for 3 days', hours: '3D', type: 'autoclicker' },
-  { id: 'auto_7d', name: 'Autoclicker', duration: 168, price: 3500, emoji: '🤖', desc: 'Auto-tap for 7 days', hours: '7D', type: 'autoclicker' },
-  { id: 'stamina_2h', name: 'Stamina', duration: 2, price: 50, emoji: '⚡', desc: '+1000 max energy for 2h', hours: '2H', type: 'stamina' },
-  { id: 'stamina_5h', name: 'Stamina', duration: 5, price: 100, emoji: '⚡', desc: '+1000 max energy for 5h', hours: '5H', type: 'stamina' },
-  { id: 'stamina_10h', name: 'Stamina', duration: 10, price: 175, emoji: '⚡', desc: '+1000 max energy for 10h', hours: '10H', type: 'stamina' },
-  { id: 'stamina_24h', name: 'Stamina', duration: 24, price: 400, emoji: '⚡', desc: '+1000 max energy for 24h', hours: '24H', type: 'stamina' },
-  { id: 'stamina_3d', name: 'Stamina', duration: 72, price: 900, emoji: '⚡', desc: '+1000 max energy for 3 days', hours: '3D', type: 'stamina' },
-  { id: 'stamina_7d', name: 'Stamina', duration: 168, price: 1750, emoji: '⚡', desc: '+1000 max energy for 7 days', hours: '7D', type: 'stamina' }
+  { id: 'auto_7d', name: 'Autoclicker', duration: 168, price: 3500, emoji: '🤖', desc: 'Auto-tap for 7 days', hours: '7D', type: 'autoclicker' }
 ]
 
-// UPGRADES COMPONENT (INLINE)
+// UPGRADES COMPONENT
 const Upgrades = ({ user, updateUser }) => {
   const [loading, setLoading] = useState(false)
 
@@ -50,12 +45,12 @@ const Upgrades = ({ user, updateUser }) => {
     const upgrade = tapPowerLevels[targetLevel - 1]
     
     if (user.coins < upgrade.cost) {
-      alert(`❌ Not enough coins!\n\nYou need ${upgrade.cost} coins\nYou have ${user.coins} coins`)
+      WebApp.showAlert(`❌ Not enough coins!\n\nYou need ${upgrade.cost} coins\nYou have ${user.coins} coins`)
       return
     }
 
     if (currentTapLevel >= targetLevel) {
-      alert('✓ Already upgraded to this level!')
+      WebApp.showAlert('✓ Already upgraded to this level!')
       return
     }
 
@@ -78,10 +73,10 @@ const Upgrades = ({ user, updateUser }) => {
         WebApp.HapticFeedback.notificationOccurred('success')
       }
 
-      alert(`🚀 TAP POWER UPGRADED!\n\n+${upgrade.power - user.tapPower} tap power\nNew power: ${upgrade.power} per tap`)
+      WebApp.showAlert(`🚀 TAP POWER UPGRADED!\n\n+${upgrade.power - user.tapPower} tap power\nNew power: ${upgrade.power} per tap`)
     } catch (error) {
       console.error('Upgrade error:', error)
-      alert('❌ Upgrade failed: ' + (error.response?.data?.error || 'Server error'))
+      WebApp.showAlert('❌ Upgrade failed: ' + (error.response?.data?.error || 'Server error'))
     } finally {
       setLoading(false)
     }
@@ -93,12 +88,12 @@ const Upgrades = ({ user, updateUser }) => {
     const upgrade = staminaLevels[targetLevel - 1]
     
     if (user.coins < upgrade.cost) {
-      alert(`❌ Not enough coins!\n\nYou need ${upgrade.cost} coins\nYou have ${user.coins} coins`)
+      WebApp.showAlert(`❌ Not enough coins!\n\nYou need ${upgrade.cost} coins\nYou have ${user.coins} coins`)
       return
     }
 
     if (currentStaminaLevel >= targetLevel) {
-      alert('✓ Already upgraded to this level!')
+      WebApp.showAlert('✓ Already upgraded to this level!')
       return
     }
 
@@ -121,10 +116,10 @@ const Upgrades = ({ user, updateUser }) => {
         WebApp.HapticFeedback.notificationOccurred('success')
       }
 
-      alert(`⚡ STAMINA UPGRADED!\n\n+${upgrade.stamina - user.maxEnergy} max energy\nNew stamina: ${upgrade.stamina}`)
+      WebApp.showAlert(`⚡ STAMINA UPGRADED!\n\n+${upgrade.stamina - user.maxEnergy} max energy\nNew stamina: ${upgrade.stamina}`)
     } catch (error) {
       console.error('Upgrade error:', error)
-      alert('❌ Upgrade failed: ' + (error.response?.data?.error || 'Server error'))
+      WebApp.showAlert('❌ Upgrade failed: ' + (error.response?.data?.error || 'Server error'))
     } finally {
       setLoading(false)
     }
@@ -335,63 +330,85 @@ const Upgrades = ({ user, updateUser }) => {
 
 // MAIN SHOP COMPONENT
 const Shop = ({ user, updateUser }) => {
-  const [activeTab, setActiveTab] = useState('upgrades') // UPGRADES FIRST!
+  const [activeTab, setActiveTab] = useState('upgrades')
   const [showConfirm, setShowConfirm] = useState(null)
 
-  const handleBoosterPurchase = (booster) => {
-    setShowConfirm(booster)
+  // TELEGRAM STARS PAYMENT
+  const handleStarsPurchase = async (booster) => {
+    try {
+      WebApp.HapticFeedback.impactOccurred('medium')
+      
+      // Create invoice
+      const response = await axios.post(
+        `${API_URL}/api/stars/create-invoice`,
+        {
+          boosterId: booster.id,
+          title: `${booster.name} - ${booster.hours}`,
+          description: booster.desc,
+          amount: booster.price
+        },
+        { headers: { 'x-telegram-init-data': WebApp.initData } }
+      )
+      
+      if (response.data.success) {
+        const invoiceLink = response.data.invoiceLink
+        
+        // Open Telegram Stars payment
+        WebApp.openInvoice(invoiceLink, async (status) => {
+          if (status === 'paid') {
+            WebApp.HapticFeedback.notificationOccurred('success')
+            await activateBoosterAfterPayment(booster)
+            WebApp.showAlert(`✅ Payment successful! ${booster.name} - ${booster.hours} activated!`)
+          } else if (status === 'cancelled') {
+            WebApp.HapticFeedback.notificationOccurred('warning')
+            WebApp.showAlert('Payment cancelled')
+          } else if (status === 'failed') {
+            WebApp.HapticFeedback.notificationOccurred('error')
+            WebApp.showAlert('Payment failed. Please try again.')
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Stars purchase error:', error)
+      WebApp.showAlert('Failed to create payment. Try again!')
+    }
   }
 
-  const confirmPurchase = async () => {
-    if (!showConfirm) return
-
-    if (confirm(`💫 Pay ${showConfirm.price} Telegram Stars?\n\n${showConfirm.name} - ${showConfirm.hours}`)) {
-      try {
-        const initData = WebApp.initData
-        
-        alert('⭐ Telegram Stars payment will be implemented in production.\n\nFor now, booster activated for testing!')
-        
-        const response = await axios.post(
-          `${API_URL}/api/boosters/activate`,
-          { 
-            boosterId: showConfirm.id,
-            duration: showConfirm.duration,
-            type: showConfirm.type
-          },
-          { headers: { 'x-telegram-init-data': initData } }
-        )
-
+  const activateBoosterAfterPayment = async (booster) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/boosters/activate`,
+        {
+          boosterId: booster.id,
+          duration: booster.duration,
+          type: booster.type,
+          isFree: false
+        },
+        { headers: { 'x-telegram-init-data': WebApp.initData } }
+      )
+      
+      if (response.data.success) {
         updateUser({
           boosters: response.data.boosters,
           maxEnergy: response.data.maxEnergy
         })
-
-        if (WebApp.HapticFeedback) {
-          WebApp.HapticFeedback.notificationOccurred('success')
-        }
-        
-        alert(`🎉 ${showConfirm.name} activated for ${showConfirm.hours}!`)
-        
-        setShowConfirm(null)
-      } catch (error) {
-        alert(error.response?.data?.error || 'Purchase failed')
-        setShowConfirm(null)
+        console.log(`✅ ${booster.name} activated!`)
       }
-    } else {
-      setShowConfirm(null)
+    } catch (error) {
+      console.error('Activate booster error:', error)
+      WebApp.showAlert('Failed to activate booster')
     }
   }
 
   const isBoosterActive = (type) => {
     if (type === 'autoclicker') {
       return user.boosters?.autoclicker?.active && new Date(user.boosters.autoclicker.expiresAt) > new Date()
-    } else {
-      return user.boosters?.stamina?.active && new Date(user.boosters.stamina.expiresAt) > new Date()
     }
+    return false
   }
 
   const getTimeRemaining = (type) => {
-    const booster = type === 'autoclicker' ? user.boosters?.autoclicker : user.boosters?.stamina
+    const booster = user.boosters?.autoclicker
     if (!booster?.active || !booster?.expiresAt) return null
     
     const now = new Date()
@@ -419,7 +436,7 @@ const Shop = ({ user, updateUser }) => {
         <div className="text-sm text-gray-400">Boost your earnings</div>
       </div>
 
-      {/* TABS - UPGRADES FIRST */}
+      {/* TABS */}
       <div className="px-6 mb-6">
         <div className="flex gap-3">
           <button
@@ -451,67 +468,42 @@ const Shop = ({ user, updateUser }) => {
       {/* BOOSTERS TAB */}
       {activeTab === 'boosters' && (
         <div className="px-6">
-          {(isBoosterActive('autoclicker') || isBoosterActive('stamina')) && (
-            <div className="mb-6 space-y-3">
-              {isBoosterActive('autoclicker') && (
-                <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl p-4 border border-orange-400/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">🤖</span>
-                      <div>
-                        <div className="font-bold">Autoclicker Active</div>
-                        <div className="text-sm text-gray-300">{getTimeRemaining('autoclicker')} left</div>
-                      </div>
+          {isBoosterActive('autoclicker') && (
+            <div className="mb-6">
+              <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl p-4 border border-orange-400/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🤖</span>
+                    <div>
+                      <div className="font-bold">Autoclicker Active</div>
+                      <div className="text-sm text-gray-300">{getTimeRemaining('autoclicker')} left</div>
                     </div>
-                    <div className="text-green-400 font-bold">✓</div>
                   </div>
+                  <div className="text-green-400 font-bold">✓</div>
                 </div>
-              )}
-              
-              {isBoosterActive('stamina') && (
-                <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl p-4 border border-cyan-400/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">⚡</span>
-                      <div>
-                        <div className="font-bold">Stamina Active</div>
-                        <div className="text-sm text-gray-300">{getTimeRemaining('stamina')} left</div>
-                      </div>
-                    </div>
-                    <div className="text-green-400 font-bold">✓</div>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-3 pb-8">
             {BOOSTERS.map((booster, index) => (
               <motion.button
                 key={booster.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.03 }}
-                onClick={() => handleBoosterPurchase(booster)}
-                className={`w-full bg-gradient-to-r ${
-                  booster.type === 'autoclicker' 
-                    ? 'from-orange-500/10 to-red-500/10 border-orange-400/30 hover:border-orange-400/60' 
-                    : 'from-cyan-500/10 to-blue-500/10 border-cyan-400/30 hover:border-cyan-400/60'
-                } backdrop-blur-xl rounded-xl p-3 border transition-all`}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => handleStarsPurchase(booster)}
+                className="w-full bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-400/30 hover:border-orange-400/60 backdrop-blur-xl rounded-2xl p-5 transition-all"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{booster.emoji}</span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-4xl">{booster.emoji}</span>
                     <div className="text-left">
-                      <div className="font-bold text-sm">{booster.name} - {booster.hours}</div>
-                      <div className="text-xs text-gray-400">{booster.desc}</div>
+                      <div className="font-bold text-lg">{booster.name} - {booster.hours}</div>
+                      <div className="text-sm text-gray-400">{booster.desc}</div>
                     </div>
                   </div>
-                  <div className={`px-4 py-2 rounded-lg font-bold text-sm ${
-                    booster.type === 'autoclicker' 
-                      ? 'bg-orange-500/20 text-orange-400 border border-orange-400/50' 
-                      : 'bg-cyan-500/20 text-cyan-400 border border-cyan-400/50'
-                  }`}>
+                  <div className="bg-gradient-to-r from-yellow-500 to-orange-500 px-5 py-3 rounded-xl font-black text-lg text-white shadow-lg">
                     ⭐ {booster.price}
                   </div>
                 </div>
@@ -520,59 +512,6 @@ const Shop = ({ user, updateUser }) => {
           </div>
         </div>
       )}
-
-      {/* MODAL */}
-      <AnimatePresence>
-        {showConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6"
-            onClick={() => setShowConfirm(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-[#1a1f3a] to-[#0a0e27] rounded-3xl p-8 max-w-sm w-full border border-cyan-500/30"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="text-center">
-                <div className="text-6xl mb-4">{showConfirm.emoji}</div>
-                <h3 className="text-2xl font-black mb-2">Confirm Purchase</h3>
-                <p className="text-gray-400 mb-6">{showConfirm.desc}</p>
-                
-                <div className="bg-white/5 rounded-2xl p-4 mb-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-400">Duration:</span>
-                    <span className="text-white font-bold">{showConfirm.hours}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Price:</span>
-                    <span className="text-yellow-400 font-bold">⭐ {showConfirm.price} Stars</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowConfirm(null)}
-                    className="flex-1 bg-white/5 text-gray-400 py-4 rounded-xl font-bold hover:bg-white/10 transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmPurchase}
-                    className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-4 rounded-xl font-bold shadow-[0_0_20px_rgba(251,146,60,0.5)] hover:shadow-[0_0_30px_rgba(251,146,60,0.7)] transition-all"
-                  >
-                    Pay ⭐
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
