@@ -43,19 +43,16 @@ function App() {
       setUser(response.data.user)
       setGlobalStats(response.data.globalStats)
       
+      // Show welcome popup for new users
+      if (response.data.isNewUser) {
+        setShowWelcome(true)
+      }
+      
       const adminId = parseInt(import.meta.env.VITE_ADMIN_ID || '0')
       const userId = WebApp.initDataUnsafe?.user?.id || 0
       setIsAdmin(userId === adminId)
       
       setLoading(false)
-
-      if (response.data.isNewUser) {
-        WebApp.showPopup({
-          title: '🎉 Welcome!',
-          message: 'Start tapping to earn coins and climb the leagues!',
-          buttons: [{ type: 'ok' }]
-        })
-      }
     } catch (error) {
       console.error('Init error:', error)
       setLoading(false)
@@ -65,9 +62,6 @@ function App() {
 
   const updateUser = (updates) => {
     setUser(prev => ({ ...prev, ...updates }))
-    if (response.data.isNewUser) {
-        setShowWelcome(true)
-      }
   }
 
   const updateGlobalStats = (stats) => {
