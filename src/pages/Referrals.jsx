@@ -40,7 +40,15 @@ const Referrals = ({ user }) => {
 
   const handleShare = () => {
     const referralLink = `https://t.me/${BOT_USERNAME}?start=ref${user.telegramId}`
-    const message = `🎮 Join me in Ultimate Tap Game and earn passive income!\n\n💰 Tap to earn coins\n🏆 Climb the leagues\n👥 Get 10% from friends' earnings\n\nJoin now: ${referralLink}`
+    const message = `🚨 AIRDROP IS LIVE! DON'T BE LATE! 🚨
+
+Stop wasting time on useless clickers! 🛑 ULTIMATE TAP is confirmed to list soon. We are printing money NOW! 💸
+
+💰 50,000 COINS instantly on start! ⛏️ MINING BOTS work for you 24/7. 👥 10% LIFETIME REBATE from friends.
+
+The snapshot is coming. Join or watch us get rich! 💎
+
+👇 START FARMING NOW 👇: ${referralLink}`
     
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(message)}`
     WebApp.openTelegramLink(shareUrl)
@@ -48,7 +56,7 @@ const Referrals = ({ user }) => {
   }
 
   const handleCopy = () => {
-    const referralLink = `https://t.me/${BOT_USERNAME}?start=ref${user.telegramId}`
+    const referralLink = `https://t.me/mimiclicker_bot?start=ref${user.telegramId}`
     
     if (navigator.clipboard) {
       navigator.clipboard.writeText(referralLink).then(() => {
