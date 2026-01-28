@@ -7,18 +7,15 @@ export default defineConfig({
     host: true,
     port: 3000,
     strictPort: true,
-    allowedHosts: [
-      'localhost',
-      '.ngrok-free.dev',
-      '.ngrok-free.app',
-      '.ngrok.io'
-    ],
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        secure: false
+    // Proxy TYLKO w dev mode (lokalnie)
+    ...(process.env.NODE_ENV !== 'production' && {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false
+        }
       }
-    }
+    })
   }
 })
