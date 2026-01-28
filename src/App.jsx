@@ -1,16 +1,26 @@
+// ===== INTEGRACJA W App.jsx =====
+// KRYTYCZNE: Banner musi być POZA systemem nawigacji!
+
 import React, { useState, useEffect } from 'react'
-import League from './pages/League'
 import WebApp from '@twa-dev/sdk'
 import axios from 'axios'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import Tasks from './pages/Tasks'
 import Referrals from './pages/Referrals'
+import League from './pages/League'
+import Earn from './pages/Earn'
 import Admin from './pages/Admin'
 import Navigation from './components/Navigation'
 import WelcomePopup from './components/WelcomePopup'
+import FloatingTaskButton from './components/FloatingTaskButton'
+
+// ===== PERSISTENT BANNER IMPORTS =====
+import { OnClickAProvider } from './context/OnClickAProvider'
+import OnClickAPersistentBanner from './components/OnClickAPersistentBanner'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const ONCLICKA_SPOT_ID = '6108783'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
@@ -43,7 +53,6 @@ function App() {
       setUser(response.data.user)
       setGlobalStats(response.data.globalStats)
       
-      // Show welcome popup for new users
       if (response.data.isNewUser) {
         setShowWelcome(true)
       }
@@ -110,6 +119,8 @@ function App() {
         return <Tasks user={user} updateUser={updateUser} />
       case 'referrals':
         return <Referrals user={user} />
+      case 'earn':
+        return <Earn user={user} updateUser={updateUser} />
       case 'admin':
         return isAdmin ? <Admin /> : <Home user={user} updateUser={updateUser} globalStats={globalStats} />
       default:
@@ -118,19 +129,37 @@ function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-[#667eea] to-[#764ba2] overflow-hidden">
-      <div className="flex-1 overflow-hidden">
-        {renderPage()}
+    // ===== ONCLICKA PROVIDER (GLOBALNY) =====
+    <OnClickAProvider spotId={ONCLICKA_SPOT_ID}>
+      <div className="h-screen flex flex-col bg-gradient-to-br from-[#667eea] to-[#764ba2] overflow-hidden">
+        
+        {/* ===== PERSISTENT BANNER (POZA ROUTING!) ===== */}
+        <OnClickAPersistentBanner height={100} />
+        
+        {/* ===== SCROLLABLE CONTENT AREA ===== */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          {renderPage()}
+        </div>
+        
+        {/* ===== BOTTOM NAVIGATION (FIXED) ===== */}
+        <Navigation 
+          currentPage={currentPage} 
+          setCurrentPage={setCurrentPage} 
+          isAdmin={isAdmin}
+        />
+        
+        {/* ===== FLOATING TASK BUTTON ===== */}
+        <FloatingTaskButton 
+          onClick={() => setCurrentPage('tasks')}
+          hasNewTasks={true}
+        />
+        
+        {/* ===== WELCOME POPUP ===== */}
+        {showWelcome && (
+          <WelcomePopup onClose={() => setShowWelcome(false)} />
+        )}
       </div>
-      <Navigation 
-        currentPage={currentPage} 
-        setCurrentPage={setCurrentPage} 
-        isAdmin={isAdmin}
-      />
-      {showWelcome && (
-        <WelcomePopup onClose={() => setShowWelcome(false)} />
-      )}
-    </div>
+    </OnClickAProvider>
   )
 }
 
