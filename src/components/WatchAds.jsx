@@ -40,7 +40,7 @@ const WatchAds = ({ user, updateUser, onClose }) => {
 
     // Try AdSgram first
     if (window.Adsgram && window.Adsgram.init) {
-      const AdController = window.Adsgram.init({ blockId: 'int-21863' })
+      const AdController = window.Adsgram.init({ blockId: 'int-21959' })
       
       AdController.show()
         .then(() => {
