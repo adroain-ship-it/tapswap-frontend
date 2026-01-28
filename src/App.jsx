@@ -8,6 +8,7 @@ import Tasks from './pages/Tasks'
 import Referrals from './pages/Referrals'
 import Admin from './pages/Admin'
 import Navigation from './components/Navigation'
+import WelcomePopup from './components/WelcomePopup'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -17,6 +18,7 @@ function App() {
   const [globalStats, setGlobalStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
 
   useEffect(() => {
     WebApp.ready()
@@ -63,6 +65,9 @@ function App() {
 
   const updateUser = (updates) => {
     setUser(prev => ({ ...prev, ...updates }))
+    if (response.data.isNewUser) {
+        setShowWelcome(true)
+      }
   }
 
   const updateGlobalStats = (stats) => {
@@ -128,6 +133,9 @@ function App() {
         setCurrentPage={setCurrentPage} 
         isAdmin={isAdmin}
       />
+      {showWelcome && (
+        <WelcomePopup onClose={() => setShowWelcome(false)} />
+      )}
     </div>
   )
 }
