@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import WebApp from '@twa-dev/sdk'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
-import WatchAds from '../components/WatchAds'
 import AdBanner from '../components/AdBanner'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
@@ -13,7 +12,6 @@ const Tasks = ({ user, updateUser }) => {
   const [verifyingTask, setVerifyingTask] = useState(null)
   const [showPromoModal, setShowPromoModal] = useState(false)
   const [promoCode, setPromoCode] = useState('')
-  const [showWatchAds, setShowWatchAds] = useState(false)
 
   const categories = ['All', 'telegram', 'youtube', 'x', 'facebook']
 
@@ -86,7 +84,7 @@ const Tasks = ({ user, updateUser }) => {
           WebApp.HapticFeedback.notificationOccurred('success')
         }
         
-        alert(`🎉 Task Completed!\n\nYou earned ${task.reward} coins!`)
+        WebApp.showAlert(`🎉 Task Completed!\n\nYou earned ${task.reward} coins!`)
       } catch (error) {
         console.error('Task complete error:', error)
         if (WebApp.HapticFeedback) {
@@ -100,7 +98,7 @@ const Tasks = ({ user, updateUser }) => {
 
   const handlePromoRedeem = async () => {
     if (!promoCode || promoCode.length < 5) {
-      alert('Please enter a valid promo code')
+      WebApp.showAlert('Please enter a valid promo code')
       return
     }
 
@@ -122,7 +120,7 @@ const Tasks = ({ user, updateUser }) => {
         WebApp.HapticFeedback.notificationOccurred('success')
       }
       
-      alert(`🎉 Success!\n\nYou received ${response.data.reward} coins!`)
+      WebApp.showAlert(`🎉 Success!\n\nYou received ${response.data.reward} coins!`)
 
       setPromoCode('')
       setShowPromoModal(false)
@@ -130,7 +128,7 @@ const Tasks = ({ user, updateUser }) => {
       if (WebApp.HapticFeedback) {
         WebApp.HapticFeedback.notificationOccurred('error')
       }
-      alert(error.response?.data?.error || 'Invalid promo code')
+      WebApp.showAlert(error.response?.data?.error || 'Invalid promo code')
     }
   }
 
@@ -154,17 +152,17 @@ const Tasks = ({ user, updateUser }) => {
               WebApp.HapticFeedback.notificationOccurred('success')
             }
             
-            alert('🎉 Reward!\n\nYou earned 100 coins!')
+            WebApp.showAlert('🎉 Reward!\n\nYou earned 100 coins!')
           } catch (error) {
             console.error('Ad reward error:', error)
           }
         })
         .catch((error) => {
           console.error('AdSgram error:', error)
-          alert('Ad not available right now. Try again later!')
+          WebApp.showAlert('Ad not available right now. Try again later!')
         })
     } else {
-      alert('Ads are loading... Please try again in a moment')
+      WebApp.showAlert('Ads are loading... Please try again in a moment')
     }
   }
 
@@ -172,12 +170,8 @@ const Tasks = ({ user, updateUser }) => {
     ? tasks
     : tasks.filter(t => t.category === selectedCategory)
 
-  if (showWatchAds) {
-    return <WatchAds user={user} updateUser={updateUser} onClose={() => setShowWatchAds(false)} />
-  }
-
   return (
-    <div className="page-container bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white">
+    <div className="page-container bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white pb-24">
       {/* AD BANNER */}
       <AdBanner blockId="YOUR_ADSGRAM_BLOCK_ID" />
 
@@ -189,12 +183,12 @@ const Tasks = ({ user, updateUser }) => {
         <p className="text-gray-400 text-sm">Complete tasks and earn rewards!</p>
       </div>
 
-      {/* WATCH ADS SECTION */}
+      {/* WATCH SINGLE AD - TYLKO TEN! */}
       <div className="px-6 mb-4">
         <motion.button
           onClick={watchSingleAd}
           whileTap={{ scale: 0.95 }}
-          className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-2xl p-5 border border-orange-400/50 shadow-[0_0_30px_rgba(251,146,60,0.4)] relative overflow-hidden mb-3"
+          className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-2xl p-5 border border-orange-400/50 shadow-[0_0_30px_rgba(251,146,60,0.4)] relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
           <div className="relative flex items-center justify-between">
@@ -203,21 +197,6 @@ const Tasks = ({ user, updateUser }) => {
               <div className="text-sm text-white/80">Earn 100 coins instantly!</div>
             </div>
             <div className="text-5xl">📺</div>
-          </div>
-        </motion.button>
-
-        <motion.button
-          onClick={() => setShowWatchAds(true)}
-          whileTap={{ scale: 0.95 }}
-          className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl p-5 border border-cyan-400/50 shadow-[0_0_30px_rgba(6,182,212,0.4)] relative overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
-          <div className="relative flex items-center justify-between">
-            <div className="text-left">
-              <div className="text-xl font-black mb-1">Watch Ads (AFK Mode)</div>
-              <div className="text-sm text-white/80">Earn continuously - 100 coins/min!</div>
-            </div>
-            <div className="text-5xl">💰</div>
           </div>
         </motion.button>
       </div>
@@ -266,7 +245,7 @@ const Tasks = ({ user, updateUser }) => {
       </div>
 
       {/* TASKS LIST */}
-      <div className="px-6 space-y-3">
+      <div className="px-6 space-y-3 pb-8">
         <AnimatePresence>
           {filteredTasks.map((task, index) => (
             <motion.div
