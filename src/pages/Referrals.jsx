@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import AdBanner from '../components/AdBanner'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
-const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME || 'YourBotUsername'
+const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME || 'mimiclicker_bot'
 
 const LEAGUE_COLORS = {
   BRONZE: '#CD7F32',
@@ -40,15 +40,13 @@ const Referrals = ({ user }) => {
 
   const handleShare = () => {
     const referralLink = `https://t.me/${BOT_USERNAME}?start=ref${user.telegramId}`
-    const message = `🚨 AIRDROP IS LIVE! DON'T BE LATE! 🚨
+    const message = `🎮 Join me in Ultimate Tap Game and earn passive income!
 
-Stop wasting time on useless clickers! 🛑 ULTIMATE TAP is confirmed to list soon. We are printing money NOW! 💸
+💰 Tap to earn coins
+🏆 Climb the leagues
+👥 Get 10% from friends' earnings
 
-💰 50,000 COINS instantly on start! ⛏️ MINING BOTS work for you 24/7. 👥 10% LIFETIME REBATE from friends.
-
-The snapshot is coming. Join or watch us get rich! 💎
-
-👇 START FARMING NOW 👇: ${referralLink}`
+Join now: ${referralLink}`
     
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(message)}`
     WebApp.openTelegramLink(shareUrl)
@@ -56,7 +54,8 @@ The snapshot is coming. Join or watch us get rich! 💎
   }
 
   const handleCopy = () => {
-    const referralLink = `https://t.me/mimiclicker_bot?start=ref${user.telegramId}`
+    // ✅ FIXED: Using BOT_USERNAME from env variable
+    const referralLink = `https://t.me/${BOT_USERNAME}?start=ref${user.telegramId}`
     
     if (navigator.clipboard) {
       navigator.clipboard.writeText(referralLink).then(() => {
@@ -93,7 +92,7 @@ The snapshot is coming. Join or watch us get rich! 💎
   }
 
   return (
-    <div className="page-container bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white">
+    <div className="page-container bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white pb-24">
       {/* AD BANNER */}
       <AdBanner blockId="YOUR_ADSGRAM_BLOCK_ID" />
       
@@ -187,7 +186,7 @@ The snapshot is coming. Join or watch us get rich! 💎
       </div>
 
       {/* FRIENDS LIST */}
-      <div className="px-6">
+      <div className="px-6 pb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Your Friends ({referrals.length})</h2>
         </div>
@@ -269,7 +268,7 @@ The snapshot is coming. Join or watch us get rich! 💎
       </div>
 
       {/* INFO SECTION */}
-      <div className="px-6 mt-8">
+      <div className="px-6 pb-8">
         <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 backdrop-blur-xl rounded-2xl p-6 border border-cyan-400/20">
           <div className="flex items-start gap-3 mb-4">
             <span className="text-3xl">💡</span>
