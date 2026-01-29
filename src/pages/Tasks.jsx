@@ -14,7 +14,7 @@ const Tasks = ({ user, updateUser }) => {
   const [showPromoModal, setShowPromoModal] = useState(false)
   const [promoCode, setPromoCode] = useState('')
   const [showRewardPopup, setShowRewardPopup] = useState(false)
-const [lastReward, setLastReward] = useState(100)
+  const [lastReward, setLastReward] = useState(100)
 
   const categories = ['All', 'telegram', 'youtube', 'x', 'facebook']
 
@@ -87,7 +87,9 @@ const [lastReward, setLastReward] = useState(100)
           WebApp.HapticFeedback.notificationOccurred('success')
         }
         
-        WebApp.showAlert(`🎉 Task Completed!\n\nYou earned ${task.reward} coins!`)
+        // ✅ POPUP ZAMIAST ALERT!
+        setLastReward(task.reward)
+        setShowRewardPopup(true)
       } catch (error) {
         console.error('Task complete error:', error)
         if (WebApp.HapticFeedback) {
@@ -123,7 +125,9 @@ const [lastReward, setLastReward] = useState(100)
         WebApp.HapticFeedback.notificationOccurred('success')
       }
       
-      WebApp.showAlert(`🎉 Success!\n\nYou received ${response.data.reward} coins!`)
+      // ✅ POPUP ZAMIAST ALERT!
+      setLastReward(response.data.reward)
+      setShowRewardPopup(true)
 
       setPromoCode('')
       setShowPromoModal(false)
@@ -155,7 +159,9 @@ const [lastReward, setLastReward] = useState(100)
               WebApp.HapticFeedback.notificationOccurred('success')
             }
             
-            WebApp.showAlert('🎉 Reward!\n\nYou earned 100 coins!')
+            // ✅ POPUP ZAMIAST ALERT!
+            setLastReward(100)
+            setShowRewardPopup(true)
           } catch (error) {
             console.error('Ad reward error:', error)
           }
@@ -186,7 +192,7 @@ const [lastReward, setLastReward] = useState(100)
         <p className="text-gray-400 text-sm">Complete tasks and earn rewards!</p>
       </div>
 
-      {/* WATCH SINGLE AD - TYLKO TEN! */}
+      {/* WATCH SINGLE AD */}
       <div className="px-6 mb-4">
         <motion.button
           onClick={watchSingleAd}
@@ -353,6 +359,13 @@ const [lastReward, setLastReward] = useState(100)
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ✅ REWARD POPUP - DODANE! */}
+      <AdsgramRewardPopup 
+        show={showRewardPopup}
+        onClose={() => setShowRewardPopup(false)}
+        reward={lastReward}
+      />
     </div>
   )
 }
