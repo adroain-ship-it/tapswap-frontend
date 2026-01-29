@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import WebApp from '@twa-dev/sdk'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
+import AdsgramRewardPopup from '../components/AdsgramRewardPopup'
 import AdBanner from '../components/AdBanner'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
