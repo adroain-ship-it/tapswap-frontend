@@ -9,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const Tasks = ({ user, updateUser }) => {
   const [tasks, setTasks] = useState([])
+  const [adsgramTasks, setAdsgramTasks] = useState([]) // ← NOWE!
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [verifyingTask, setVerifyingTask] = useState(null)
   const [showPromoModal, setShowPromoModal] = useState(false)
@@ -23,19 +24,77 @@ const Tasks = ({ user, updateUser }) => {
     loadAdsgram()
   }, [])
 
+  // ===== ZMIENIONA FUNKCJA loadAdsgram =====
   const loadAdsgram = () => {
-    // Load AdSgram SDK
     if (!window.Adsgram) {
       const script = document.createElement('script')
       script.src = 'https://sad.adsgram.ai/js/sad.min.js'
       script.async = true
       script.onload = () => {
-        console.log('AdSgram loaded')
+        console.log('✅ AdSgram loaded')
         if (window.Adsgram) {
-          window.Adsgram.init({ blockId: 'YOUR_ADSGRAM_BLOCK_ID' })
+          try {
+            // Inicjalizuj z task-offers format
+            window.Adsgram.init({ blockId: 'task-21964' })
+            console.log('✅ AdSgram initialized')
+            
+            // Pobierz dynamiczne zadania
+            fetchAdsgramTasks()
+          } catch (error) {
+            console.error('❌ AdSgram init error:', error)
+          }
         }
       }
       document.body.appendChild(script)
+    }
+  }
+
+  // ===== NOWA FUNKCJA fetchAdsgramTasks =====
+  const fetchAdsgramTasks = async () => {
+    try {
+      console.log('📥 Fetching AdSgram tasks...')
+      
+      // Mock AdSgram tasks (w produkcji będą z AdSgram API)
+      const mockAdsgramTasks = [
+        {
+          taskId: 'adsgram_tg_1',
+          title: 'Join Partner Channel',
+          description: 'Subscribe to earn bonus coins',
+          icon: '📢',
+          url: 'https://t.me/example_channel',
+          reward: 150,
+          category: 'telegram',
+          isAdsgram: true,
+          completed: false
+        },
+        {
+          taskId: 'adsgram_yt_1',
+          title: 'Watch Partner Video',
+          description: 'Watch full video to earn',
+          icon: '▶️',
+          url: 'https://youtube.com/watch?v=example',
+          reward: 200,
+          category: 'youtube',
+          isAdsgram: true,
+          completed: false
+        },
+        {
+          taskId: 'adsgram_x_1',
+          title: 'Follow Partner on X',
+          description: 'Follow our partner account',
+          icon: '🐦',
+          url: 'https://x.com/example',
+          reward: 100,
+          category: 'x',
+          isAdsgram: true,
+          completed: false
+        }
+      ]
+      
+      setAdsgramTasks(mockAdsgramTasks)
+      console.log('✅ AdSgram tasks loaded:', mockAdsgramTasks.length)
+    } catch (error) {
+      console.error('❌ Fetch AdSgram tasks error:', error)
     }
   }
 
@@ -87,7 +146,6 @@ const Tasks = ({ user, updateUser }) => {
           WebApp.HapticFeedback.notificationOccurred('success')
         }
         
-        // ✅ POPUP ZAMIAST ALERT!
         setLastReward(task.reward)
         setShowRewardPopup(true)
       } catch (error) {
@@ -99,6 +157,61 @@ const Tasks = ({ user, updateUser }) => {
         setVerifyingTask(null)
       }
     }, 3000)
+  }
+
+  // ===== NOWA FUNKCJA handleAdsgramTaskClick =====
+  const handleAdsgramTaskClick = async (task) => {
+    if (task.completed) return
+
+    WebApp.openLink(task.url)
+    if (WebApp.HapticFeedback) {
+      WebApp.HapticFeedback.impactOccurred('medium')
+    }
+
+    setVerifyingTask(task.taskId)
+
+    setTimeout(async () => {
+      try {
+        const initData = WebApp.initData
+        const response = await axios.post(
+          `${API_URL}/api/adsgram/task-complete`,
+          {
+            taskId: task.taskId,
+            reward: task.reward,
+            taskName: task.title
+          },
+          { headers: { 'x-telegram-init-data': initData } }
+        )
+
+        updateUser({
+          coins: response.data.coins,
+          totalEarned: response.data.totalEarned
+        })
+
+        // Oznacz jako ukończone
+        setAdsgramTasks(prev =>
+          prev.map(t =>
+            t.taskId === task.taskId ? { ...t, completed: true } : t
+          )
+        )
+
+        if (WebApp.HapticFeedback) {
+          WebApp.HapticFeedback.notificationOccurred('success')
+        }
+        
+        setLastReward(task.reward)
+        setShowRewardPopup(true)
+
+      } catch (error) {
+        console.error('AdSgram task complete error:', error)
+        if (WebApp.HapticFeedback) {
+          WebApp.HapticFeedback.notificationOccurred('error')
+        }
+        WebApp.showAlert(error.response?.data?.error || 'Task verification failed')
+      } finally {
+        setVerifyingTask(null)
+      }
+    }, 5000)
   }
 
   const handlePromoRedeem = async () => {
@@ -125,7 +238,6 @@ const Tasks = ({ user, updateUser }) => {
         WebApp.HapticFeedback.notificationOccurred('success')
       }
       
-      // ✅ POPUP ZAMIAST ALERT!
       setLastReward(response.data.reward)
       setShowRewardPopup(true)
 
@@ -159,7 +271,6 @@ const Tasks = ({ user, updateUser }) => {
               WebApp.HapticFeedback.notificationOccurred('success')
             }
             
-            // ✅ POPUP ZAMIAST ALERT!
             setLastReward(100)
             setShowRewardPopup(true)
           } catch (error) {
@@ -175,14 +286,17 @@ const Tasks = ({ user, updateUser }) => {
     }
   }
 
+  // ===== ZMIENIONA LOGIKA filteredTasks - POŁĄCZ ADSGRAM + NORMALNE =====
+  const allTasks = [...adsgramTasks, ...tasks]
+  
   const filteredTasks = selectedCategory === 'All'
-    ? tasks
-    : tasks.filter(t => t.category === selectedCategory)
+    ? allTasks
+    : allTasks.filter(t => t.category === selectedCategory)
 
   return (
     <div className="page-container bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white pb-24">
       {/* AD BANNER */}
-      <AdBanner blockId="YOUR_ADSGRAM_BLOCK_ID" />
+      <AdBanner blockId="task-21964" />
 
       {/* HEADER */}
       <div className="p-6">
@@ -264,13 +378,15 @@ const Tasks = ({ user, updateUser }) => {
               transition={{ delay: index * 0.05 }}
             >
               <button
-                onClick={() => handleTaskClick(task)}
+                onClick={() => task.isAdsgram ? handleAdsgramTaskClick(task) : handleTaskClick(task)}
                 disabled={task.completed || verifyingTask === task.taskId}
                 className={`w-full p-5 rounded-2xl border transition-all ${
                   task.completed
                     ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30'
                     : verifyingTask === task.taskId
                     ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/50 animate-pulse'
+                    : task.isAdsgram
+                    ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 hover:border-orange-400/60'
                     : 'bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border-cyan-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]'
                 }`}
               >
@@ -278,7 +394,14 @@ const Tasks = ({ user, updateUser }) => {
                   <div className="flex items-center gap-4">
                     <span className="text-4xl">{task.icon}</span>
                     <div className="text-left">
-                      <div className="font-bold text-lg">{task.title}</div>
+                      <div className="font-bold text-lg flex items-center gap-2">
+                        {task.title}
+                        {task.isAdsgram && (
+                          <span className="text-xs bg-orange-500/30 text-orange-400 px-2 py-0.5 rounded-full border border-orange-400/50">
+                            PARTNER
+                          </span>
+                        )}
+                      </div>
                       <div className="text-sm text-gray-400">{task.description}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-yellow-400 font-bold">+{task.reward}</span>
@@ -296,7 +419,11 @@ const Tasks = ({ user, updateUser }) => {
                       ⏳ Verifying...
                     </div>
                   ) : (
-                    <div className="bg-cyan-500/20 text-cyan-400 px-4 py-2 rounded-xl font-bold text-sm border border-cyan-500/50">
+                    <div className={`px-4 py-2 rounded-xl font-bold text-sm border ${
+                      task.isAdsgram
+                        ? 'bg-orange-500/20 text-orange-400 border-orange-500/50'
+                        : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50'
+                    }`}>
                       Start →
                     </div>
                   )}
@@ -360,7 +487,7 @@ const Tasks = ({ user, updateUser }) => {
         )}
       </AnimatePresence>
 
-      {/* ✅ REWARD POPUP - DODANE! */}
+      {/* REWARD POPUP */}
       <AdsgramRewardPopup 
         show={showRewardPopup}
         onClose={() => setShowRewardPopup(false)}
