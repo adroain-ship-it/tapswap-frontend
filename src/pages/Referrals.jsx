@@ -39,7 +39,7 @@ const Referrals = ({ user }) => {
   }
 
   const handleShare = () => {
-    const referralLink = `https://t.me/mimiclicker_bot?start=ref${user.telegramId}`
+    const referralLink = `https://t.me/${BOT_USERNAME}?start=ref${user.telegramId}`
     const message = `🎮 Join me in Ultimate Tap Game and earn passive income!
 
 💰 Tap to earn coins
