@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import WebApp from '@twa-dev/sdk'
 import axios from 'axios'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import Tasks from './pages/Tasks'
@@ -158,6 +159,9 @@ function App() {
         {showWelcome && (
           <WelcomePopup onClose={() => setShowWelcome(false)} />
         )}
+        
+        {/* ===== VERCEL SPEED INSIGHTS ===== */}
+        <SpeedInsights />
       </div>
     </OnClickAProvider>
   )
