@@ -19,6 +19,9 @@ import FloatingTaskButton from './components/FloatingTaskButton'
 import { OnClickAProvider } from './context/OnClickAProvider'
 import OnClickAPersistentBanner from './components/OnClickAPersistentBanner'
 
+// ===== VERCEL ANALYTICS =====
+import { Analytics } from '@vercel/analytics/react'
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 const ONCLICKA_SPOT_ID = '6108783'
 
@@ -158,6 +161,9 @@ function App() {
         {showWelcome && (
           <WelcomePopup onClose={() => setShowWelcome(false)} />
         )}
+        
+        {/* ===== VERCEL ANALYTICS ===== */}
+        <Analytics />
       </div>
     </OnClickAProvider>
   )
