@@ -223,6 +223,28 @@ const Home = ({ user, updateUser, globalStats }) => {
         </div>
       </div>
 
+      {/* AIRDROP ANNOUNCEMENT */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-4"
+      >
+        <div className="bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl p-3 border border-yellow-400/30 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent animate-pulse" />
+          <div className="relative flex items-center gap-2">
+            <div className="text-3xl animate-bounce">🪂</div>
+            <div className="flex-1">
+              <div className="font-black text-yellow-400 text-xs mb-0.5">
+                AIRDROP INCOMING!
+              </div>
+              <div className="text-white/80 text-[10px] leading-tight">
+                Early alpha players earn MORE on airdrop. Maximize your coins, watch ads & be active in community. Everything counts!
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
       {/* LEAGUE BAR */}
       <LeagueBar 
         current={user.league}
