@@ -134,7 +134,7 @@ const Tasks = ({ user, updateUser }) => {
 
   const watchSingleAd = () => {
     if (window.Adsgram) {
-      const AdController = window.Adsgram.init({ blockId: 'YOUR_ADSGRAM_BLOCK_ID' })
+      const AdController = window.Adsgram.init({ blockId: 'int-21959' })
       
       AdController.show()
         .then(async () => {
