@@ -54,20 +54,26 @@ Join now: ${referralLink}`
   }
 
   const handleCopy = () => {
-    // ✅ FIXED: Using BOT_USERNAME from env variable
     const referralLink = `https://t.me/${BOT_USERNAME}?start=ref${user.telegramId}`
     
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(referralLink).then(() => {
-        WebApp.HapticFeedback.notificationOccurred('success')
-        WebApp.showPopup({
-          title: '✓ Copied!',
-          message: 'Referral link copied to clipboard',
-          buttons: [{ type: 'ok' }]
+    // Próbuj użyć clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(referralLink)
+        .then(() => {
+          WebApp.HapticFeedback.notificationOccurred('success')
+          WebApp.showPopup({
+            title: '✓ Copied!',
+            message: 'Referral link copied to clipboard',
+            buttons: [{ type: 'ok' }]
+          })
         })
-      })
+        .catch(() => {
+          // Fallback - pokaż link w alert
+          WebApp.showAlert(`Your referral link:\n\n${referralLink}\n\nLong press to copy!`)
+        })
     } else {
-      WebApp.showAlert(referralLink)
+      // Jeśli clipboard nie działa - pokaż link
+      WebApp.showAlert(`Your referral link:\n\n${referralLink}\n\nLong press to copy!`)
     }
   }
 

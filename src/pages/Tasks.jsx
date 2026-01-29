@@ -9,12 +9,13 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const Tasks = ({ user, updateUser }) => {
   const [tasks, setTasks] = useState([])
+  const [adsgramTasks, setAdsgramTasks] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [verifyingTask, setVerifyingTask] = useState(null)
   const [showPromoModal, setShowPromoModal] = useState(false)
   const [promoCode, setPromoCode] = useState('')
   const [showRewardPopup, setShowRewardPopup] = useState(false)
-const [lastReward, setLastReward] = useState(100)
+  const [lastReward, setLastReward] = useState(100)
 
   const categories = ['All', 'telegram', 'youtube', 'x', 'facebook']
 
@@ -24,18 +25,69 @@ const [lastReward, setLastReward] = useState(100)
   }, [])
 
   const loadAdsgram = () => {
-    // Load AdSgram SDK
     if (!window.Adsgram) {
       const script = document.createElement('script')
       script.src = 'https://sad.adsgram.ai/js/sad.min.js'
       script.async = true
       script.onload = () => {
-        console.log('AdSgram loaded')
+        console.log('✅ AdSgram SDK loaded')
         if (window.Adsgram) {
-          window.Adsgram.init({ blockId: 'YOUR_ADSGRAM_BLOCK_ID' })
+          window.Adsgram.init({ blockId: 'int-21959' })
         }
+        fetchAdsgramTasks()
       }
       document.body.appendChild(script)
+    } else {
+      fetchAdsgramTasks()
+    }
+  }
+
+  const fetchAdsgramTasks = async () => {
+    try {
+      console.log('📥 Fetching AdSgram Task Offers...')
+      
+      const userId = WebApp.initDataUnsafe?.user?.id || user.telegramId
+      
+      const adsgramTaskOffers = [
+        {
+          taskId: 'adsgram_task_1',
+          title: 'Join Partner Channel',
+          description: 'Subscribe to our partner channel',
+          icon: '📢',
+          url: `https://api.adsgram.ai/task?block_id=task-21964&user_id=${userId}`,
+          reward: 150,
+          category: 'telegram',
+          isAdsgram: true,
+          completed: false
+        },
+        {
+          taskId: 'adsgram_task_2',
+          title: 'Watch Partner Video',
+          description: 'Watch full video to earn coins',
+          icon: '▶️',
+          url: `https://api.adsgram.ai/task?block_id=task-21964&user_id=${userId}`,
+          reward: 200,
+          category: 'youtube',
+          isAdsgram: true,
+          completed: false
+        },
+        {
+          taskId: 'adsgram_task_3',
+          title: 'Follow Partner on X',
+          description: 'Follow our partner X account',
+          icon: '🐦',
+          url: `https://api.adsgram.ai/task?block_id=task-21964&user_id=${userId}`,
+          reward: 100,
+          category: 'x',
+          isAdsgram: true,
+          completed: false
+        }
+      ]
+      
+      setAdsgramTasks(adsgramTaskOffers)
+      console.log('✅ AdSgram Task Offers loaded:', adsgramTaskOffers.length)
+    } catch (error) {
+      console.error('❌ Fetch AdSgram tasks error:', error)
     }
   }
 
@@ -87,7 +139,8 @@ const [lastReward, setLastReward] = useState(100)
           WebApp.HapticFeedback.notificationOccurred('success')
         }
         
-        WebApp.showAlert(`🎉 Task Completed!\n\nYou earned ${task.reward} coins!`)
+        setLastReward(task.reward)
+        setShowRewardPopup(true)
       } catch (error) {
         console.error('Task complete error:', error)
         if (WebApp.HapticFeedback) {
@@ -97,6 +150,18 @@ const [lastReward, setLastReward] = useState(100)
         setVerifyingTask(null)
       }
     }, 3000)
+  }
+
+  const handleAdsgramTaskClick = async (task) => {
+    if (task.completed) return
+
+    WebApp.openLink(task.url)
+    
+    if (WebApp.HapticFeedback) {
+      WebApp.HapticFeedback.impactOccurred('medium')
+    }
+
+    WebApp.showAlert('Complete the task in the opened page. Your reward will be credited automatically!')
   }
 
   const handlePromoRedeem = async () => {
@@ -123,7 +188,8 @@ const [lastReward, setLastReward] = useState(100)
         WebApp.HapticFeedback.notificationOccurred('success')
       }
       
-      WebApp.showAlert(`🎉 Success!\n\nYou received ${response.data.reward} coins!`)
+      setLastReward(response.data.reward)
+      setShowRewardPopup(true)
 
       setPromoCode('')
       setShowPromoModal(false)
@@ -155,7 +221,8 @@ const [lastReward, setLastReward] = useState(100)
               WebApp.HapticFeedback.notificationOccurred('success')
             }
             
-            WebApp.showAlert('🎉 Reward!\n\nYou earned 100 coins!')
+            setLastReward(100)
+            setShowRewardPopup(true)
           } catch (error) {
             console.error('Ad reward error:', error)
           }
@@ -169,16 +236,16 @@ const [lastReward, setLastReward] = useState(100)
     }
   }
 
+  const allTasks = [...adsgramTasks, ...tasks]
+  
   const filteredTasks = selectedCategory === 'All'
-    ? tasks
-    : tasks.filter(t => t.category === selectedCategory)
+    ? allTasks
+    : allTasks.filter(t => t.category === selectedCategory)
 
   return (
     <div className="page-container bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white pb-24">
-      {/* AD BANNER */}
-      <AdBanner blockId="YOUR_ADSGRAM_BLOCK_ID" />
+      <AdBanner blockId="int-21959" />
 
-      {/* HEADER */}
       <div className="p-6">
         <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
           Earn More
@@ -186,7 +253,6 @@ const [lastReward, setLastReward] = useState(100)
         <p className="text-gray-400 text-sm">Complete tasks and earn rewards!</p>
       </div>
 
-      {/* WATCH SINGLE AD - TYLKO TEN! */}
       <div className="px-6 mb-4">
         <motion.button
           onClick={watchSingleAd}
@@ -204,7 +270,6 @@ const [lastReward, setLastReward] = useState(100)
         </motion.button>
       </div>
 
-      {/* PROMO CODE */}
       <div className="px-6 mb-6">
         <motion.button
           onClick={() => setShowPromoModal(true)}
@@ -224,7 +289,6 @@ const [lastReward, setLastReward] = useState(100)
         </motion.button>
       </div>
 
-      {/* CATEGORIES */}
       <div className="px-6 mb-6">
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
           {categories.map(cat => (
@@ -247,7 +311,6 @@ const [lastReward, setLastReward] = useState(100)
         </div>
       </div>
 
-      {/* TASKS LIST */}
       <div className="px-6 space-y-3 pb-8">
         <AnimatePresence>
           {filteredTasks.map((task, index) => (
@@ -258,13 +321,15 @@ const [lastReward, setLastReward] = useState(100)
               transition={{ delay: index * 0.05 }}
             >
               <button
-                onClick={() => handleTaskClick(task)}
+                onClick={() => task.isAdsgram ? handleAdsgramTaskClick(task) : handleTaskClick(task)}
                 disabled={task.completed || verifyingTask === task.taskId}
                 className={`w-full p-5 rounded-2xl border transition-all ${
                   task.completed
                     ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30'
                     : verifyingTask === task.taskId
                     ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/50 animate-pulse'
+                    : task.isAdsgram
+                    ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 hover:border-orange-400/60'
                     : 'bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border-cyan-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]'
                 }`}
               >
@@ -272,7 +337,14 @@ const [lastReward, setLastReward] = useState(100)
                   <div className="flex items-center gap-4">
                     <span className="text-4xl">{task.icon}</span>
                     <div className="text-left">
-                      <div className="font-bold text-lg">{task.title}</div>
+                      <div className="font-bold text-lg flex items-center gap-2">
+                        {task.title}
+                        {task.isAdsgram && (
+                          <span className="text-xs bg-orange-500/30 text-orange-400 px-2 py-0.5 rounded-full border border-orange-400/50">
+                            PARTNER
+                          </span>
+                        )}
+                      </div>
                       <div className="text-sm text-gray-400">{task.description}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-yellow-400 font-bold">+{task.reward}</span>
@@ -290,7 +362,11 @@ const [lastReward, setLastReward] = useState(100)
                       ⏳ Verifying...
                     </div>
                   ) : (
-                    <div className="bg-cyan-500/20 text-cyan-400 px-4 py-2 rounded-xl font-bold text-sm border border-cyan-500/50">
+                    <div className={`px-4 py-2 rounded-xl font-bold text-sm border ${
+                      task.isAdsgram
+                        ? 'bg-orange-500/20 text-orange-400 border-orange-500/50'
+                        : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50'
+                    }`}>
                       Start →
                     </div>
                   )}
@@ -301,7 +377,6 @@ const [lastReward, setLastReward] = useState(100)
         </AnimatePresence>
       </div>
 
-      {/* PROMO MODAL */}
       <AnimatePresence>
         {showPromoModal && (
           <motion.div
@@ -353,6 +428,12 @@ const [lastReward, setLastReward] = useState(100)
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AdsgramRewardPopup 
+        show={showRewardPopup}
+        onClose={() => setShowRewardPopup(false)}
+        reward={lastReward}
+      />
     </div>
   )
 }
