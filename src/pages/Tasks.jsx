@@ -13,6 +13,8 @@ const Tasks = ({ user, updateUser }) => {
   const [verifyingTask, setVerifyingTask] = useState(null)
   const [showPromoModal, setShowPromoModal] = useState(false)
   const [promoCode, setPromoCode] = useState('')
+  const [showRewardPopup, setShowRewardPopup] = useState(false)
+const [lastReward, setLastReward] = useState(100)
 
   const categories = ['All', 'telegram', 'youtube', 'x', 'facebook']
 
